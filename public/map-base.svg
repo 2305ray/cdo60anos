@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" width="800" height="520">
+  <!-- LAND -->
+  <rect width="800" height="520" fill="#f2ece0"/>
+
+  <!-- GUARAPIRANGA RESERVOIR (visible eastern inlet) -->
+  <path d="M0,0 L125,0 L140,35 L148,90 L154,150 L160,210 L164,270 L165,330 L162,390 L155,450 L142,520 L0,520 Z"
+        fill="#b5d8ef" stroke="#90bcd8" stroke-width="1.2"/>
+
+  <!-- GREEN AREAS -->
+  <!-- Autódromo infield + surrounding parkland -->
+  <path d="M230,128 L362,128 L368,160 L368,268 L342,275 L242,275 L234,252 L228,200 L226,160 Z"
+        fill="#cde4a8" opacity="0.85"/>
+  <!-- Eastern parks/green -->
+  <rect x="590" y="55" width="95" height="60" rx="6" fill="#cde4a8" opacity="0.5"/>
+  <rect x="680" y="280" width="120" height="80" rx="6" fill="#cde4a8" opacity="0.4"/>
+
+  <!-- BLOCK FILL (building density) -->
+  <rect x="155" y="0" width="70" height="128" fill="#ebe5d3" opacity="0.6"/>
+  <rect x="370" y="128" width="115" height="145" fill="#ebe5d3" opacity="0.7"/>
+  <rect x="372" y="320" width="95" height="120" fill="#ebe5d3" opacity="0.6"/>
+  <rect x="490" y="70" width="190" height="140" fill="#ebe5d3" opacity="0.65"/>
+  <rect x="485" y="260" width="160" height="145" fill="#ebe5d3" opacity="0.6"/>
+  <rect x="635" y="120" width="165" height="205" fill="#ebe5d3" opacity="0.6"/>
+  <rect x="195" y="340" width="155" height="140" fill="#ebe5d3" opacity="0.55"/>
+  <rect x="200" y="430" width="240" height="90" fill="#ebe5d3" opacity="0.5"/>
+
+  <!-- ROAD CASINGS (background stroke, drawn first) -->
+  <!-- Av. Interlagos (main diagonal, NE→SW) -->
+  <path d="M795,10 C755,28 710,52 665,80 C625,105 582,130 540,152 C500,170 462,185 424,202 C385,218 348,234 312,254 C275,272 238,292 200,318 C165,342 128,370 90,402 C62,424 35,450 5,478"
+        stroke="#c8b890" stroke-width="11" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Av. Sen. Teotônio Vilela (E-W, y≈89) -->
+  <line x1="162" y1="89" x2="795" y2="89" stroke="#c8b890" stroke-width="9"/>
+  <!-- Av. Atlântica (N-S, x≈558) -->
+  <line x1="558" y1="0" x2="562" y2="320" stroke="#c8b890" stroke-width="8"/>
+  <!-- Av. Pascoal da Rocha Falcão (the venue's avenue, x≈200 area, diagonal) -->
+  <path d="M162,88 L230,200 L245,275 L210,340 L165,420"
+        stroke="#ccc0a5" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <!-- Cross-street at y≈200 (E-W) -->
+  <line x1="162" y1="200" x2="800" y2="200" stroke="#ccc0a5" stroke-width="7"/>
+  <!-- Cross-street at y≈300 (partial E-W) -->
+  <line x1="162" y1="300" x2="620" y2="300" stroke="#ccc0a5" stroke-width="6"/>
+  <!-- N-S at x≈345 -->
+  <line x1="345" y1="128" x2="345" y2="440" stroke="#ccc0a5" stroke-width="6"/>
+  <!-- Minor streets grid (local) -->
+  <line x1="472" y1="89" x2="472" y2="320" stroke="#d5caad" stroke-width="4.5"/>
+  <line x1="620" y1="89" x2="620" y2="325" stroke="#d5caad" stroke-width="4.5"/>
+  <line x1="700" y1="89" x2="700" y2="325" stroke="#d5caad" stroke-width="4.5"/>
+  <line x1="162" y1="148" x2="620" y2="148" stroke="#d5caad" stroke-width="4.5"/>
+  <line x1="162" y1="250" x2="620" y2="250" stroke="#d5caad" stroke-width="4.5"/>
+  <line x1="162" y1="360" x2="560" y2="360" stroke="#d5caad" stroke-width="4.5"/>
+  <line x1="162" y1="430" x2="460" y2="430" stroke="#d5caad" stroke-width="4.5"/>
+  <line x1="258" y1="275" x2="258" y2="520" stroke="#d5caad" stroke-width="4"/>
+  <line x1="395" y1="275" x2="395" y2="520" stroke="#d5caad" stroke-width="4"/>
+
+  <!-- ROAD SURFACES (white) -->
+  <path d="M795,10 C755,28 710,52 665,80 C625,105 582,130 540,152 C500,170 462,185 424,202 C385,218 348,234 312,254 C275,272 238,292 200,318 C165,342 128,370 90,402 C62,424 35,450 5,478"
+        stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="162" y1="89" x2="795" y2="89" stroke="#fff" stroke-width="6"/>
+  <line x1="558" y1="0" x2="562" y2="320" stroke="#fff" stroke-width="5.5"/>
+  <path d="M162,88 L230,200 L245,275 L210,340 L165,420"
+        stroke="#fff" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+  <line x1="162" y1="200" x2="800" y2="200" stroke="#fff" stroke-width="4.5"/>
+  <line x1="162" y1="300" x2="620" y2="300" stroke="#fff" stroke-width="4"/>
+  <line x1="345" y1="128" x2="345" y2="440" stroke="#fff" stroke-width="4"/>
+  <line x1="472" y1="89" x2="472" y2="320" stroke="#fff" stroke-width="3"/>
+  <line x1="620" y1="89" x2="620" y2="325" stroke="#fff" stroke-width="3"/>
+  <line x1="700" y1="89" x2="700" y2="325" stroke="#fff" stroke-width="3"/>
+  <line x1="162" y1="148" x2="620" y2="148" stroke="#fff" stroke-width="3"/>
+  <line x1="162" y1="250" x2="620" y2="250" stroke="#fff" stroke-width="3"/>
+  <line x1="162" y1="360" x2="560" y2="360" stroke="#fff" stroke-width="3"/>
+  <line x1="162" y1="430" x2="460" y2="430" stroke="#fff" stroke-width="3"/>
+  <line x1="258" y1="275" x2="258" y2="520" stroke="#fff" stroke-width="2.5"/>
+  <line x1="395" y1="275" x2="395" y2="520" stroke="#fff" stroke-width="2.5"/>
+
+  <!-- AUTÓDROMO DE INTERLAGOS -->
+  <!-- Outer boundary / infield -->
+  <path d="M244,240 L346,240 C360,240 367,230 367,219 L367,186 C367,172 356,162 343,157 L319,148 C305,141 290,139 276,143 L262,148 C250,153 241,164 241,178 L239,218 C239,229 241,236 244,240 Z"
+        fill="#c5dca0" stroke="#7ca050" stroke-width="1.5"/>
+  <!-- Circuit track (darker green ring) - outer -->
+  <path d="M244,240 L346,240 C360,240 367,230 367,219 L367,186 C367,172 356,162 343,157 L319,148 C305,141 290,139 276,143 L262,148 C250,153 241,164 241,178 L239,218 C239,229 241,236 244,240 Z"
+        fill="none" stroke="#5a7830" stroke-width="15"/>
+  <!-- Circuit track - surface color (asphalt gray-green) -->
+  <path d="M244,240 L346,240 C360,240 367,230 367,219 L367,186 C367,172 356,162 343,157 L319,148 C305,141 290,139 276,143 L262,148 C250,153 241,164 241,178 L239,218 C239,229 241,236 244,240 Z"
+        fill="none" stroke="#b8c890" stroke-width="10"/>
+  <!-- Start/finish line -->
+  <rect x="340" y="231" width="8" height="12" fill="white" opacity="0.85"/>
+  <rect x="340" y="231" width="4" height="12" fill="#333" opacity="0.3"/>
+
+  <!-- WATER LABEL -->
+  <text font-family="Arial Narrow,Arial,sans-serif" font-size="10.5" font-weight="600" 
+        fill="#3a78a8" letter-spacing="0.09em" text-anchor="middle"
+        transform="translate(62,270) rotate(-70)">GUARAPIRANGA</text>
+
+  <!-- ROAD LABELS -->
+  <text x="590" y="83" font-family="Arial,sans-serif" font-size="9.5" font-weight="600" 
+        fill="#7a6848" letter-spacing="0.03em">Av. Sen. Teotônio Vilela</text>
+  <text font-family="Arial,sans-serif" font-size="9" font-weight="600" 
+        fill="#7a6848" letter-spacing="0.02em"
+        transform="translate(665,28) rotate(17)">Av. Interlagos</text>
+  <!-- Autódromo label inside infield -->
+  <text x="303" y="192" font-family="Arial Narrow,Arial,sans-serif" font-size="10" font-weight="700" 
+        fill="#3a5820" letter-spacing="0.06em" text-anchor="middle">AUTÓDROMO</text>
+  <text x="303" y="205" font-family="Arial Narrow,Arial,sans-serif" font-size="9" font-weight="600" 
+        fill="#3a5820" letter-spacing="0.03em" text-anchor="middle">Interlagos</text>
+  <!-- NORTH ARROW -->
+  <g transform="translate(765,480)">
+    <circle cx="0" cy="0" r="18" fill="white" stroke="#ccc" stroke-width="1" opacity="0.9"/>
+    <polygon points="0,-12 4,4 0,1 -4,4" fill="#333"/>
+    <polygon points="0,12 4,-4 0,-1 -4,-4" fill="#ccc"/>
+    <text x="0" y="-14" text-anchor="middle" font-family="Arial Narrow,Arial,sans-serif"
+          font-size="9" font-weight="700" fill="#333">N</text>
+  </g>
+
+  <!-- SCALE BAR -->
+  <g transform="translate(20,498)">
+    <rect x="0" y="0" width="80" height="10" fill="none" stroke="#888" stroke-width="1"/>
+    <rect x="0" y="0" width="40" height="10" fill="#888"/>
+    <text x="0" y="22" font-family="Arial,sans-serif" font-size="9" fill="#666">0</text>
+    <text x="35" y="22" font-family="Arial,sans-serif" font-size="9" fill="#666">0,5</text>
+    <text x="72" y="22" font-family="Arial,sans-serif" font-size="9" fill="#666">1 km</text>
+  </g>
+
+  <!-- LEGEND NOTE (bottom right) -->
+  <text x="695" y="508" text-anchor="end" font-family="Arial,sans-serif" font-size="9" fill="#888">© OpenStreetMap contributors</text>
+</svg>
