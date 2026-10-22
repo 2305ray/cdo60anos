@@ -43,6 +43,22 @@ function useScrollEdges() {
   return { ref, edges, scrollBy };
 }
 
+/** Botão redondo de avançar/voltar a barra de anos (fica do lado de fora da barra). */
+function EdgeButton({ label, disabled, onClick, children }: { label: string; disabled: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <Button
+      variant="subtle"
+      size="icon-lg"
+      aria-label={label}
+      disabled={disabled}
+      onClick={onClick}
+      className="mt-[23px] size-9 shrink-0 self-start rounded-full disabled:opacity-30"
+    >
+      {children}
+    </Button>
+  );
+}
+
 export function Timeline() {
   const { items, prev, next, swipeHint, scrollBack, scrollForward } = CONTENT.history;
   const [index, setIndex] = useState(0);
@@ -51,6 +67,7 @@ export function Timeline() {
   const nodesRef = useRef<(HTMLButtonElement | null)[]>([]);
   const swipeX = useRef<number | null>(null);
   const { ref: trackRef, edges, scrollBy } = useScrollEdges();
+  const scrollable = edges.start || edges.end;
 
   const go = (i: number) => {
     const j = Math.max(0, Math.min(items.length - 1, i));
@@ -81,90 +98,89 @@ export function Timeline() {
 
   return (
     <>
-      <div className="relative mt-[34px]">
-        <div ref={trackRef} className="overflow-x-auto px-1 pt-2 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div
-            role="tablist"
-            className="tl-rail relative flex min-w-[760px] justify-between pt-1"
-            onKeyDown={(e) => {
-              if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
-              const forward = (e.key === "ArrowRight") !== isRtl();
-              const j = Math.max(0, Math.min(items.length - 1, index + (forward ? 1 : -1)));
-              go(j);
-              nodesRef.current[j]?.focus();
-            }}
-          >
+      {/* setas ficam FORA da barra (não cobrem os anos); só aparecem quando a barra não cabe na tela */}
+      <div className="mt-[34px] flex items-center gap-1.5">
+        {scrollable && (
+          <EdgeButton label={scrollBack} disabled={!edges.start} onClick={() => scrollBy(-1)}>
+            <ChevronLeftIcon className="size-5 rtl:-scale-x-100" />
+          </EdgeButton>
+        )}
+        <div className="relative min-w-0 flex-1">
+          <div ref={trackRef} className="overflow-x-auto px-1 pt-2 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div
-              className="absolute start-[18px] top-6 h-2.5 rounded-full bg-navy-600 transition-[width] duration-450 ease-[cubic-bezier(.2,.9,.3,1)]"
-              style={{ width: fill }}
-            />
-            {items.map((it, i) => {
-              const selected = i === index;
-              return (
-                <button
-                  key={it.year}
-                  ref={(el) => {
-                    nodesRef.current[i] = el;
-                  }}
-                  type="button"
-                  role="tab"
-                  aria-selected={selected}
-                  aria-controls="tl-panel"
-                  tabIndex={selected ? 0 : -1}
-                  onClick={() => go(i)}
-                  className="group/node relative z-[1] flex min-w-[72px] cursor-pointer flex-col items-center gap-2.5 px-1 text-muted-foreground transition-colors hover:text-navy-600"
-                >
-                  <i
-                    className={cn(
-                      "mt-3 block size-[34px] rounded-full border-4 transition-[transform,background] duration-250",
-                      !selected && "group-hover/node:scale-110",
-                      selected
-                        ? "scale-[1.35] border-navy bg-gold"
-                        : i < index
-                          ? "border-navy-600 bg-navy-600"
-                          : "border-gold-600 bg-card",
-                    )}
-                  />
-                  <b className={cn("text-[15px] font-extrabold whitespace-nowrap", selected && "text-foreground")}>{it.year}</b>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* bordas: esmaecido + seta, só do lado onde ainda tem ano escondido */}
-        {(
-          [
-            ["start", -1, scrollBack, ChevronLeftIcon, "start-0 bg-linear-to-r"],
-            ["end", 1, scrollForward, ChevronRightIcon, "end-0 bg-linear-to-l"],
-          ] as const
-        ).map(([side, dir, label, Icon, place]) => (
-          <div
-            key={side}
-            aria-hidden={!edges[side]}
-            className={cn(
-              "pointer-events-none absolute inset-y-0 flex w-16 items-center from-background via-background/85 to-transparent transition-opacity duration-200",
-              side === "end" ? "justify-end" : "justify-start",
-              place,
-              edges[side] ? "opacity-100" : "opacity-0",
-            )}
-          >
-            <Button
-              variant="gold"
-              size="icon-lg"
-              tabIndex={edges[side] ? 0 : -1}
-              aria-label={label}
-              onClick={() => scrollBy(dir)}
-              className={cn("size-9 rounded-full shadow-[0_3px_0_var(--color-gold-600)]", edges[side] && "pointer-events-auto")}
+              role="tablist"
+              className="tl-rail relative flex min-w-[760px] justify-between pt-1"
+              onKeyDown={(e) => {
+                if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+                const forward = (e.key === "ArrowRight") !== isRtl();
+                const j = Math.max(0, Math.min(items.length - 1, index + (forward ? 1 : -1)));
+                go(j);
+                nodesRef.current[j]?.focus();
+              }}
             >
-              <Icon className="size-5 rtl:-scale-x-100" />
-            </Button>
+              <div
+                className="absolute start-[18px] top-6 h-2.5 rounded-full bg-navy-600 transition-[width] duration-450 ease-[cubic-bezier(.2,.9,.3,1)]"
+                style={{ width: fill }}
+              />
+              {items.map((it, i) => {
+                const selected = i === index;
+                return (
+                  <button
+                    key={it.year}
+                    ref={(el) => {
+                      nodesRef.current[i] = el;
+                    }}
+                    type="button"
+                    role="tab"
+                    aria-selected={selected}
+                    aria-controls="tl-panel"
+                    tabIndex={selected ? 0 : -1}
+                    onClick={() => go(i)}
+                    className="group/node relative z-[1] flex min-w-[72px] cursor-pointer flex-col items-center gap-2.5 px-1 text-muted-foreground transition-colors hover:text-navy-600"
+                  >
+                    <i
+                      className={cn(
+                        "mt-3 block size-[34px] rounded-full border-4 transition-[transform,background] duration-250",
+                        !selected && "group-hover/node:scale-110",
+                        selected
+                          ? "scale-[1.35] border-navy bg-gold"
+                          : i < index
+                            ? "border-navy-600 bg-navy-600"
+                            : "border-gold-600 bg-card",
+                      )}
+                    />
+                    <b className={cn("text-[15px] font-extrabold whitespace-nowrap", selected && "text-foreground")}>{it.year}</b>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        ))}
+
+          {/* esmaecido nas bordas, só do lado onde ainda tem ano escondido */}
+          <div
+            aria-hidden="true"
+            className={cn(
+              "pointer-events-none absolute inset-y-0 start-0 w-10 bg-linear-to-r from-background to-transparent transition-opacity duration-200",
+              edges.start ? "opacity-100" : "opacity-0",
+            )}
+          />
+          <div
+            aria-hidden="true"
+            className={cn(
+              "pointer-events-none absolute inset-y-0 end-0 w-10 bg-linear-to-l from-background to-transparent transition-opacity duration-200",
+              edges.end ? "opacity-100" : "opacity-0",
+            )}
+          />
+        </div>
+        {scrollable && (
+          <EdgeButton label={scrollForward} disabled={!edges.end} onClick={() => scrollBy(1)}>
+            <ChevronRightIcon className="size-5 rtl:-scale-x-100" />
+          </EdgeButton>
+        )}
       </div>
 
       {/* aviso de deslizar: aparece só quando a barra não cabe inteira na tela */}
-      {(edges.start || edges.end) && (
+      {scrollable && (
         <p className="mt-2 flex items-center justify-center gap-1.5 text-sm font-bold text-muted-foreground">
           <ChevronLeftIcon className="size-4 animate-pulse" aria-hidden="true" />
           {swipeHint}

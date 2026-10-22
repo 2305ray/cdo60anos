@@ -153,3 +153,10 @@ body { top: 0 !important; position: static !important; }
 iframe.skiptranslate, .goog-te-banner-frame, #goog-gt-tt, .goog-te-balloon-frame,
 .VIpgJd-ZVi9od-ORHb-OEVmcd, .VIpgJd-ZVi9od-aZ2wEe-wOHMyf, .VIpgJd-yAWNEb-L7lbkb { display: none !important; }
 .goog-text-highlight { background: none !important; box-shadow: none !important; }
+
+/* ══════════ SELO DO NETLIFY ══════════
+   No plano gratuito o Netlify injeta o selo "Powered by Netlify" (e uma barra de ferramentas)
+   em iframes próprios. O jeito oficial de tirar é no painel (Project configuration → General →
+   Powered by Netlify badge); isto aqui garante que ele não apareça mesmo se a opção estiver ligada. */
+#nl-badge-frame,
+#nl-hud-frame { display: none !important; }
