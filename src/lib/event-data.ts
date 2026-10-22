@@ -6,39 +6,84 @@ export const INSTAGRAM_URL = "https://www.instagram.com/cdo60anos";
 export const MAPS_URL =
   "https://www.google.com/maps/search/?api=1&query=ADC%20Eletropaulo%2C%20Rua%20Peixe%20Vivo%2C%20155%2C%20S%C3%A3o%20Paulo";
 export const WAZE_URL = "https://waze.com/ul?q=Rua%20Peixe%20Vivo%20155%20Sao%20Paulo&navigate=yes";
-export const WHATSAPP_SOCIAL = "5516992069540";
+// WhatsApp do Mestre Tigrin (projetos sociais). Só aparece dentro do link, nunca escrito na página.
+const WHATSAPP_SOCIAL = "5516992069540";
+export const whatsappLink = (message: string) =>
+  `https://wa.me/${WHATSAPP_SOCIAL}?text=${encodeURIComponent(message)}`;
 
-// Abertura do evento (horário de Brasília)
+// Abertura e encerramento do evento (horário de Brasília)
 export const EVENT_START = "2027-01-22T08:00:00-03:00";
+export const EVENT_END = "2027-01-24T23:59:59-03:00";
+
+export const VENUE = {
+  name: "ADC Eletropaulo",
+  street: "Rua Peixe Vivo, 155",
+  district: "Jardim Santa Helena",
+  city: "São Paulo",
+  state: "SP",
+  postalCode: "04772-100",
+  country: "BR",
+};
+
+// Valores cobrados no local, por dia
+export const CAMPING_PRICE = "50";
+export const PARKING_PRICES = { carro: "25", onibus: "50" };
 
 export type LoteId = "lote1" | "pacote" | "lote2" | "lote3";
 
-// O status de cada lote (esgotado / disponível / em breve) sai dessas datas.
-export const LOTES: { id: LoteId; preco: string; inicio?: string; fim: string; destaque?: boolean }[] = [
-  { id: "lote1", preco: "280", fim: "2026-11-30T23:59:59-03:00" },
-  { id: "pacote", preco: "1.300", fim: "2026-11-30T23:59:59-03:00", destaque: true },
-  { id: "lote2", preco: "330", inicio: "2026-12-01T00:00:00-03:00", fim: "2026-12-31T23:59:59-03:00" },
-  { id: "lote3", preco: "380", inicio: "2027-01-01T00:00:00-03:00", fim: "2027-01-24T23:59:59-03:00" },
+export type Lote = {
+  id: LoteId;
+  preco: string;
+  inicio?: string;
+  fim: string;
+  destaque?: boolean;
+  /** Lote que vem antes na sequência; se ele for fechado antes do prazo, este abre na hora. */
+  anterior?: LoteId;
+  /** Encerrar antes do prazo (ex.: vagas acabaram): mude para `true` e publique de novo. */
+  fechado?: boolean;
+};
+
+// O status de cada lote sai das datas abaixo. Para fechar um lote antes da hora, use `fechado: true`.
+export const LOTES: Lote[] = [
+  { id: "lote1", preco: "280", fim: "2026-11-30T23:59:59-03:00", fechado: false },
+  { id: "pacote", preco: "1.300", fim: "2026-11-30T23:59:59-03:00", destaque: true, fechado: false },
+  { id: "lote2", preco: "330", inicio: "2026-12-01T00:00:00-03:00", fim: "2026-12-31T23:59:59-03:00", anterior: "lote1", fechado: false },
+  { id: "lote3", preco: "380", inicio: "2027-01-01T00:00:00-03:00", fim: "2027-01-24T23:59:59-03:00", anterior: "lote2", fechado: false },
 ];
 
-// Prazo usado no aviso do topo
-export const LOTE1_FIM = LOTES[0].fim;
+export type LoteStatus = "esgotado" | "encerrado" | "disponivel" | "em-breve";
 
-export type LoteStatus = "encerrado" | "disponivel" | "em-breve";
+/**
+ * Status de todos os lotes num instante.
+ * - `fechado: true` → "esgotado" (vale antes de qualquer data)
+ * - passou do `fim` → "encerrado"
+ * - ainda não começou → "em-breve"
+ *
+ * Um lote "começa" na data de `inicio` ou antes, se o anterior já tinha começado e foi fechado à mão.
+ * Assim, fechar o 1º lote abre o 2º na hora, mas fechar o 2º antes da data dele não abre o 3º.
+ */
+export function loteStatuses(lotes: Lote[], now: number): Record<LoteId, LoteStatus> {
+  const byId = new Map(lotes.map((l) => [l.id, l]));
 
-export function loteStatus(lote: (typeof LOTES)[number], now: number): LoteStatus {
-  if (now > new Date(lote.fim).getTime()) return "encerrado";
-  if (lote.inicio && now < new Date(lote.inicio).getTime()) return "em-breve";
-  return "disponivel";
+  const started = (lote: Lote): boolean => {
+    if (!lote.inicio || now >= new Date(lote.inicio).getTime()) return true;
+    const prev = lote.anterior ? byId.get(lote.anterior) : undefined;
+    return !!prev?.fechado && started(prev);
+  };
+
+  const statusOf = (lote: Lote): LoteStatus => {
+    if (lote.fechado) return "esgotado";
+    if (now > new Date(lote.fim).getTime()) return "encerrado";
+    return started(lote) ? "disponivel" : "em-breve";
+  };
+
+  return Object.fromEntries(lotes.map((l) => [l.id, statusOf(l)])) as Record<LoteId, LoteStatus>;
 }
 
-export type HotelGroup = "green" | "orange" | "red";
+// Usados pelo aviso do topo
+export const LOTE1 = LOTES[0];
 
-export const GROUP_COLORS: Record<HotelGroup, string> = {
-  green: "#22A447",
-  orange: "#F2711C",
-  red: "#D33A2C",
-};
+export type HotelGroup = "green" | "orange" | "red";
 
 export const HOTEL_FILTER_GROUPS: (HotelGroup | "all")[] = ["all", "green", "orange", "red"];
 

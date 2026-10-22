@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dia de Ouro 2027 · 60 anos do Cordão de Ouro
 
-## Getting Started
+Landing page do evento de 60 anos do Grupo de Capoeira Cordão de Ouro (22 a 24 de janeiro de 2027, São Paulo).
 
-First, run the development server:
+Feita com **Next.js 16** (App Router, página estática), **Tailwind CSS 4**, **shadcn/ui** (sobre Base UI) e testes com **Vitest**.
+
+## Rodar o projeto
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
+npm test           # testes
+npm run lint       # padrões de código
+npm run build      # gera a versão de produção
+npm start          # serve a versão de produção
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Publicação (Netlify)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+O site é publicado no **Netlify** a partir do GitHub: cada push na branch principal gera um deploy novo. O `netlify.toml` roda os testes antes do build; se algum falhar, nada é publicado.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+O endereço do site (link canônico, sitemap, `robots.txt`, imagem de compartilhamento e dados do Google) vem sozinho da variável `URL` do Netlify. Ao conectar um domínio próprio no painel do Netlify, faça um novo deploy (**Deploys → Trigger deploy**) para esses links passarem a usar o domínio. Se precisar forçar outro endereço, configure `NEXT_PUBLIC_SITE_URL`.
 
-## Learn More
+## Como editar o site
 
-To learn more about Next.js, take a look at the following resources:
+| O que mudar | Onde |
+|---|---|
+| Textos da página | `src/lib/content.ts` |
+| Preços, datas dos lotes, link do formulário, endereço, hotéis, WhatsApp | `src/lib/event-data.ts` |
+| Cores | `tailwind.config.ts` (paleta) |
+| Imagens | `src/assets/img/` + `src/assets/images.ts` |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Fechar um lote antes do prazo
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Em `src/lib/event-data.ts`, troque `fechado: false` por `fechado: true` no lote. O card mostra "Esgotado", o aviso do topo some (se for o 1º lote) e o próximo lote abre na hora.
 
-## Deploy on Vercel
+### Publicar a programação
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Em `src/lib/content.ts`, revise os dias em `program.days` e troque `pronta: false` por `pronta: true`. Enquanto estiver `false`, os cards aparecem apagados com "Em breve".
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Cores
+
+Use sempre as classes da paleta (`bg-gold`, `text-navy-500`, `border-gold-600`…), nunca cor solta (`#hex`). A paleta fica em `tailwind.config.ts` e vira também variáveis CSS (`var(--color-gold-400)`).
+
+## Organização do código
+
+```
+src/
+  app/                 página, layout, metadados, sitemap, robots e imagem de compartilhamento
+  components/
+    sections/          uma seção da página por arquivo (Hero, History, About, Program…)
+    layout/section.tsx blocos repetidos das seções (Section, H2, Lead, Eyebrow, Rope, Price)
+    ui/                componentes do shadcn com as variantes do evento (Button, Badge, Card, IconBox…)
+    *.tsx              partes interativas (menu, contagem regressiva, lotes, linha do tempo, mapa de hotéis)
+  hooks/               relógio compartilhado e seção ativa do menu
+  lib/                 dados, textos e regras (status dos lotes, aviso do topo, SEO, tradução) + testes
+  assets/              imagens
+```
+
+As regras com lógica ficam em funções puras em `src/lib/` e têm testes ao lado (`*.test.ts`): status dos lotes por data, fechar lote à mão, contagem de dias do aviso, contagem regressiva, idioma do tradutor, seção ativa do menu, dados do evento para o Google e geração da paleta.
+
+## Tradução
+
+O seletor de idioma usa o **Google Tradutor**. O script do Google só é baixado quando precisa: quando a pessoa abre o menu de idiomas, já escolheu outro idioma antes ou está com o navegador em outro idioma (PT, EN, ES, IT, RU, HE, JA).
+
+## Segurança e SEO
+
+- Cabeçalhos de segurança e Content Security Policy em `next.config.ts`
+- Dados estruturados do evento (schema.org/Event) com data, local e preço de cada lote
+- `sitemap.xml`, `robots.txt`, link canônico e imagem de compartilhamento gerada no build
+- O número do WhatsApp só aparece dentro do link do botão, não escrito na página

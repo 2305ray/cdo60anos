@@ -1,19 +1,25 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Flag, type FlagCode } from "./Flag";
+import { ChevronDownIcon } from "lucide-react";
+import { useEffect, useSyncExternalStore } from "react";
+import { Flag } from "./Flag";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  LANGS,
+  SOURCE_LANG,
+  cookieValueFor,
+  isRtl,
+  langFromBrowser,
+  langFromCookie,
+  shortLabel,
+} from "@/lib/translate";
 
-// `google` é o código que o Google Tradutor usa (hebraico ainda é "iw" no widget)
-const LANGS: { google: string; name: string; flag: FlagCode; rtl?: boolean }[] = [
-  { google: "pt", name: "Português", flag: "BR" },
-  { google: "en", name: "English", flag: "US" },
-  { google: "es", name: "Español", flag: "ES" },
-  { google: "it", name: "Italiano", flag: "IT" },
-  { google: "ru", name: "Русский", flag: "RU" },
-  { google: "iw", name: "עברית", flag: "IL", rtl: true },
-  { google: "ja", name: "日本語", flag: "JP" },
-];
-const SOURCE = "pt";
 const STORAGE_KEY = "cdo60-lang";
 
 declare global {
@@ -30,24 +36,29 @@ declare global {
   }
 }
 
-function readCookieLang() {
-  const m = document.cookie.match(/(?:^|;\s*)googtrans=\/[^/]*\/([^;]+)/);
-  return m ? decodeURIComponent(m[1]) : SOURCE;
-}
+// Idioma atual = o que está no cookie do Google. Quem grava o cookie avisa os ouvintes.
+const listeners = new Set<() => void>();
+const subscribeLang = (l: () => void) => {
+  listeners.add(l);
+  return () => listeners.delete(l);
+};
+const useCurrentLang = () =>
+  useSyncExternalStore(
+    subscribeLang,
+    () => langFromCookie(document.cookie),
+    () => SOURCE_LANG,
+  );
 
+// O Google grava o cookie no domínio atual e às vezes no domínio pai; apaga/grava nos dois
 function writeCookie(value: string | null) {
   const host = location.hostname;
-  const domains = ["", host, `.${host.split(".").slice(-2).join(".")}`];
-  for (const d of domains) {
-    const domain = d ? `; domain=${d}` : "";
+  for (const domain of ["", host, `.${host.split(".").slice(-2).join(".")}`]) {
+    const d = domain ? `; domain=${domain}` : "";
     document.cookie = value
-      ? `googtrans=${value}; path=/${domain}`
-      : `googtrans=; path=/${domain}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+      ? `googtrans=${value}; path=/${d}`
+      : `googtrans=; path=/${d}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
   }
-}
-
-function setDir(google: string) {
-  document.documentElement.dir = LANGS.find((l) => l.google === google)?.rtl ? "rtl" : "ltr";
+  listeners.forEach((l) => l());
 }
 
 function loadGoogleTranslate() {
@@ -56,12 +67,24 @@ function loadGoogleTranslate() {
     if (!window.google) return;
     new window.google.translate.TranslateElement(
       {
-        pageLanguage: SOURCE,
-        includedLanguages: LANGS.filter((l) => l.google !== SOURCE).map((l) => l.google).join(","),
+        pageLanguage: SOURCE_LANG,
+        includedLanguages: LANGS.filter((l) => l.google !== SOURCE_LANG).map((l) => l.google).join(","),
         autoDisplay: false,
       },
       "google_translate_element",
     );
+    // Como o script carrega depois da página pronta, o widget não aplica sozinho o idioma salvo
+    // no cookie (visitante que já tinha escolhido outro idioma): aplicamos assim que o <select> existir.
+    const saved = langFromCookie(document.cookie);
+    if (saved === SOURCE_LANG) return;
+    const id = setInterval(() => {
+      const combo = document.querySelector<HTMLSelectElement>("select.goog-te-combo");
+      if (!combo) return;
+      clearInterval(id);
+      combo.value = saved;
+      combo.dispatchEvent(new Event("change"));
+    }, 200);
+    setTimeout(() => clearInterval(id), 10_000);
   };
   const s = document.createElement("script");
   s.id = "google-translate-script";
@@ -70,128 +93,95 @@ function loadGoogleTranslate() {
   document.body.appendChild(s);
 }
 
-// Troca o idioma pelo <select> escondido do Google; se ele ainda não carregou, o cookie + reload resolve
-function translateTo(google: string) {
+// Troca pelo <select> escondido do widget; se ele ainda não existe, o cookie + reload resolve
+function translateTo(lang: string) {
   try {
-    localStorage.setItem(STORAGE_KEY, google);
+    localStorage.setItem(STORAGE_KEY, lang);
   } catch {}
-  if (google === SOURCE) {
-    writeCookie(null);
+  const value = cookieValueFor(lang);
+  writeCookie(value);
+  if (!value) {
     location.reload();
     return;
   }
-  writeCookie(`/${SOURCE}/${google}`);
-  setDir(google);
+  document.documentElement.dir = isRtl(lang) ? "rtl" : "ltr";
   const combo = document.querySelector<HTMLSelectElement>("select.goog-te-combo");
-  if (combo) {
-    combo.value = google;
-    combo.dispatchEvent(new Event("change"));
-  } else {
+  if (!combo) {
     location.reload();
+    return;
   }
+  combo.value = lang;
+  combo.dispatchEvent(new Event("change"));
 }
 
 export function LanguageMenu() {
-  const [current, setCurrent] = useState(SOURCE);
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLUListElement>(null);
+  const current = useCurrentLang();
 
+  // O script do Google (~100 KB, de terceiros) só é baixado quando precisa:
+  // idioma já escolhido antes, navegador em outro idioma, ou quando o menu é aberto.
   useEffect(() => {
-    const saved = readCookieLang();
-    setCurrent(saved);
-    setDir(saved);
-    loadGoogleTranslate();
+    const saved = langFromCookie(document.cookie);
+    document.documentElement.dir = isRtl(saved) ? "rtl" : "ltr";
 
     // Primeira visita: segue o idioma do navegador, se for um dos disponíveis
-    let chosen: string | null = null;
+    let chosenBefore = false;
     try {
-      chosen = localStorage.getItem(STORAGE_KEY);
+      chosenBefore = localStorage.getItem(STORAGE_KEY) !== null;
     } catch {}
-    if (!chosen && saved === SOURCE) {
-      const nav = navigator.language.slice(0, 2).toLowerCase();
-      const google = nav === "he" ? "iw" : nav;
-      if (google !== SOURCE && LANGS.some((l) => l.google === google)) {
-        setCurrent(google);
-        // espera o widget do Google existir
-        const id = setInterval(() => {
-          if (document.querySelector("select.goog-te-combo")) {
-            clearInterval(id);
-            translateTo(google);
-          }
-        }, 300);
-        setTimeout(() => clearInterval(id), 8000);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!open) return;
-    listRef.current?.querySelector<HTMLLIElement>('[aria-selected="true"]')?.focus();
-    const close = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    const auto = !chosenBefore && saved === SOURCE_LANG ? langFromBrowser(navigator.language) : null;
+    if (saved !== SOURCE_LANG || auto) loadGoogleTranslate();
+    if (!auto) return;
+    const id = setInterval(() => {
+      if (!document.querySelector("select.goog-te-combo")) return;
+      clearInterval(id);
+      translateTo(auto);
+    }, 300);
+    const stop = setTimeout(() => clearInterval(id), 10_000);
+    return () => {
+      clearInterval(id);
+      clearTimeout(stop);
     };
-    document.addEventListener("click", close);
-    return () => document.removeEventListener("click", close);
-  }, [open]);
-
-  const choose = (google: string) => {
-    setOpen(false);
-    if (google === current) return;
-    setCurrent(google);
-    translateTo(google);
-  };
-
-  const onKeyDown = (e: React.KeyboardEvent<HTMLUListElement>) => {
-    const items = Array.from(listRef.current?.children ?? []) as HTMLElement[];
-    const i = items.indexOf(document.activeElement as HTMLElement);
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      items[(i + 1) % items.length]?.focus();
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      items[(i - 1 + items.length) % items.length]?.focus();
-    } else if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      (document.activeElement as HTMLElement)?.click();
-    } else if (e.key === "Escape") {
-      setOpen(false);
-    }
-  };
+  }, []);
 
   const active = LANGS.find((l) => l.google === current) ?? LANGS[0];
 
   return (
-    <div className="lang notranslate" translate="no" ref={rootRef}>
-      <button
-        type="button"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-label={`Idioma: ${active.name}`}
-        onClick={() => setOpen((o) => !o)}
-      >
-        <Flag code={active.flag} />
-        <span>{active.google === "iw" ? "HE" : active.google.toUpperCase()}</span>
-        <svg className="chev" viewBox="0 0 12 12" aria-hidden="true">
-          <path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="2" />
-        </svg>
-      </button>
-      {open && (
-        <ul role="listbox" ref={listRef} onKeyDown={onKeyDown}>
-          {LANGS.map((l) => (
-            <li
-              key={l.google}
-              role="option"
-              tabIndex={-1}
-              aria-selected={l.google === current}
-              onClick={() => choose(l.google)}
-            >
-              <Flag code={l.flag} />
-              {l.name}
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="notranslate" translate="no">
+      <DropdownMenu onOpenChange={(open) => open && loadGoogleTranslate()}>
+        <DropdownMenuTrigger
+          aria-label={`Idioma: ${active.name}`}
+          className="flex cursor-pointer items-center gap-2 rounded-full border border-white/20 bg-white/10 py-1.5 ps-1.5 pe-3 text-sm font-bold text-white transition-colors hover:bg-white/15 aria-expanded:bg-white/15"
+        >
+          <Flag code={active.flag} />
+          <span>{shortLabel(active.google)}</span>
+          <ChevronDownIcon className="size-3.5 transition-transform in-aria-expanded:rotate-180" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          sideOffset={10}
+          className="notranslate w-56 rounded-2xl border-2 border-gold p-1.5 text-navy shadow-[0_20px_50px_rgb(0_0_0/0.35)] ring-0"
+          translate="no"
+        >
+          <DropdownMenuRadioGroup
+            value={current}
+            onValueChange={(lang: string) => {
+              if (lang !== current) translateTo(lang);
+            }}
+          >
+            {LANGS.map((l) => (
+              <DropdownMenuRadioItem
+                key={l.google}
+                value={l.google}
+                closeOnClick
+                className="cursor-pointer gap-3 rounded-[10px] py-2.5 ps-3 text-[15px] transition-colors hover:bg-muted data-checked:bg-accent data-checked:font-extrabold data-highlighted:bg-muted"
+              >
+                <Flag code={l.flag} className="h-5 w-[30px]" />
+                {l.name}
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <div id="google_translate_element" />
     </div>
   );

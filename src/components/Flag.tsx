@@ -1,4 +1,7 @@
-export type FlagCode = "BR" | "US" | "ES" | "IT" | "RU" | "IL" | "JP";
+import { cn } from "@/lib/utils";
+import type { Lang } from "@/lib/translate";
+
+type FlagCode = Lang["flag"];
 
 function Stripes({ colors, vertical }: { colors: string[]; vertical?: boolean }) {
   const n = colors.length;
@@ -15,20 +18,6 @@ function Stripes({ colors, vertical }: { colors: string[]; vertical?: boolean })
   );
 }
 
-function UsFlag() {
-  return (
-    <>
-      {Array.from({ length: 13 }, (_, i) => (
-        <rect key={i} y={(i * 20) / 13} width="30" height={20 / 13 + 0.05} fill={i % 2 ? "#fff" : "#B22234"} />
-      ))}
-      <rect width="13" height={(20 * 7) / 13} fill="#3C3B6E" />
-      {Array.from({ length: 20 }, (_, k) => (
-        <circle key={k} cx={1.5 + (k % 5) * 2.5} cy={1.4 + Math.floor(k / 5) * 2.6} r=".55" fill="#fff" />
-      ))}
-    </>
-  );
-}
-
 const FLAGS: Record<FlagCode, React.ReactNode> = {
   BR: (
     <>
@@ -38,7 +27,17 @@ const FLAGS: Record<FlagCode, React.ReactNode> = {
       <path d="M10.6 9.2c3-.9 6.3-.4 8.8 1.3" stroke="#fff" strokeWidth=".8" fill="none" />
     </>
   ),
-  US: <UsFlag />,
+  US: (
+    <>
+      {Array.from({ length: 13 }, (_, i) => (
+        <rect key={i} y={(i * 20) / 13} width="30" height={20 / 13 + 0.05} fill={i % 2 ? "#fff" : "#B22234"} />
+      ))}
+      <rect width="13" height={(20 * 7) / 13} fill="#3C3B6E" />
+      {Array.from({ length: 20 }, (_, k) => (
+        <circle key={`s${k}`} cx={1.5 + (k % 5) * 2.5} cy={1.4 + Math.floor(k / 5) * 2.6} r=".55" fill="#fff" />
+      ))}
+    </>
+  ),
   ES: (
     <>
       <rect width="30" height="20" fill="#AA151B" />
@@ -63,10 +62,10 @@ const FLAGS: Record<FlagCode, React.ReactNode> = {
   ),
 };
 
-export function Flag({ code }: { code: FlagCode }) {
+export function Flag({ code, className }: { code: FlagCode; className?: string }) {
   return (
-    <span className="fl">
-      <svg viewBox="0 0 30 20" preserveAspectRatio="none" aria-hidden="true">
+    <span className={cn("block h-4 w-6 shrink-0 overflow-hidden rounded-[3px] shadow-[0_0_0_1px_rgb(0_0_0/0.15)]", className)}>
+      <svg viewBox="0 0 30 20" preserveAspectRatio="none" aria-hidden="true" className="block size-full">
         {FLAGS[code]}
       </svg>
     </span>

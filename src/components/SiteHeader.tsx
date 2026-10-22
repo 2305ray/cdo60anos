@@ -1,104 +1,111 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { MenuIcon } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
 import { LanguageMenu } from "./LanguageMenu";
+import { NoticeBar } from "./NoticeBar";
+import { IMG } from "@/assets/images";
+import { useActiveSection } from "@/hooks/use-active-section";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { CONTENT, NAV } from "@/lib/content";
-import { FORM_URL, LOTE1_FIM } from "@/lib/event-data";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
-const DAY = 86_400_000;
-const BRT_OFFSET = 3 * 3_600_000;
-const END = new Date(LOTE1_FIM).getTime();
+const NAV_IDS = NAV.map((n) => n.href.slice(1));
 
-// Dias de calendário (horário de Brasília) até o fim do 1º lote: 0 = hoje é o último dia
-function daysLeft(now: number) {
-  if (now > END) return -1;
-  const day = (t: number) => Math.floor((t - BRT_OFFSET) / DAY);
-  return day(END) - day(now);
-}
-
-function noticeText(days: number) {
-  if (days < 0) return null;
-  if (days === 0) return CONTENT.aviso.hoje;
-  if (days === 1) return CONTENT.aviso.amanha;
-  return CONTENT.aviso.dias(days);
-}
-
-// `buildTime` evita diferença de hidratação; depois de montar, a contagem usa o relógio do visitante
+/** Topo fixo: faixa do 1º lote + menu (com a seção atual destacada) + idioma. */
 export function SiteHeader({ buildTime }: { buildTime: number }) {
-  const [days, setDays] = useState(() => daysLeft(buildTime));
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const update = () => setDays(daysLeft(Date.now()));
-    update();
-    const id = setInterval(update, 60_000);
-    return () => clearInterval(id);
-  }, []);
-
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    if (!open) return;
-    const close = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    window.addEventListener("keydown", close);
-    return () => window.removeEventListener("keydown", close);
-  }, [open]);
-
-  const notice = noticeText(days);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const active = useActiveSection(NAV_IDS);
 
   return (
-    <div className="top-stack">
-      {notice && (
-        <div className="notice" role="status">
-          <span className="notice-dot" aria-hidden="true" />
-          {/* key: remonta o texto quando o número muda, para o Google Tradutor traduzir de novo */}
-          <span key={days}>{notice}</span>
-          <a href={FORM_URL} target="_blank" rel="noopener">
-            {CONTENT.aviso.cta} →
+    <div className="sticky top-0 z-50">
+      <NoticeBar buildTime={buildTime} />
+
+      <header className="border-b-[3px] border-gold bg-navy-900/95 text-white backdrop-blur-md">
+        <div className="wrap flex min-h-16 items-center gap-3.5">
+          <a href="#conteudo" aria-label="Dia de Ouro: voltar ao início" className="flex items-center gap-2.5 font-black whitespace-nowrap no-underline transition-opacity hover:opacity-85">
+            <Image src={IMG.logo} alt="Cordão de Ouro Capoeira" sizes="42px" className="h-auto w-[42px]" />
+            <span className="notranslate hidden min-[400px]:inline" translate="no">
+              DIA DE OURO
+            </span>
           </a>
-        </div>
-      )}
-      <header className="site-header">
-        <div className="wrap bar">
-          <a className="brand" href="#top">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/img/logo.webp" alt="Cordão de Ouro Capoeira" width={42} height={45} />
-            <span className="notranslate" translate="no">DIA DE OURO</span>
-          </a>
-          <nav className="main" aria-label="Menu">
-            {NAV.map((n) => (
-              <a key={n.href} href={n.href}>
-                {n.label}
-              </a>
-            ))}
+
+          <nav aria-label="Menu" className="hidden flex-1 gap-0.5 overflow-x-auto [scrollbar-width:none] min-[961px]:flex">
+            {NAV.map((n) => {
+              const isActive = active === n.href.slice(1);
+              return (
+                <a
+                  key={n.href}
+                  href={n.href}
+                  aria-current={isActive ? "location" : undefined}
+                  className={cn(
+                    "relative rounded-lg px-2.5 py-2 text-[15px] font-medium whitespace-nowrap text-navy-100 no-underline transition-colors hover:bg-white/10 hover:text-white",
+                    // sublinhado dourado embaixo do item da seção que está na tela
+                    "after:absolute after:inset-x-2.5 after:bottom-0.5 after:h-[3px] after:origin-center after:scale-x-0 after:rounded-full after:bg-gold after:transition-transform",
+                    isActive && "bg-white/10 font-bold text-white after:scale-x-100",
+                  )}
+                >
+                  {n.label}
+                </a>
+              );
+            })}
           </nav>
-          <LanguageMenu />
-          <a className="btn btn-gold btn-sm top-cta" href="#inscricao">
-            {CONTENT.ctaTop}
-          </a>
-          <button
-            type="button"
-            className={cn("hamburger", open && "is-open")}
-            aria-label={open ? "Fechar menu" : "Abrir menu"}
-            aria-expanded={open}
-            aria-controls="mobile-menu"
-            onClick={() => setOpen((o) => !o)}
-          >
-            <span />
-            <span />
-            <span />
-          </button>
+
+          <div className="ms-auto flex items-center gap-2.5 min-[961px]:ms-0">
+            <LanguageMenu />
+            <Button
+              render={<a href="#inscricao" />}
+              nativeButton={false}
+              variant="gold"
+              size="cta-sm"
+              className="hidden min-[961px]:inline-flex"
+            >
+              {CONTENT.ctaTop}
+            </Button>
+
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+              <SheetTrigger
+                render={<Button variant="ghost" size="icon-lg" className="text-white hover:bg-white/15 hover:text-white min-[961px]:hidden" />}
+                aria-label="Abrir menu"
+              >
+                <MenuIcon className="size-6" />
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[min(320px,85vw)] border-gold bg-navy-900 px-5 pt-14 pb-6 text-white">
+                <SheetTitle className="sr-only">Menu</SheetTitle>
+                <nav aria-label="Menu" className="flex flex-col">
+                  {NAV.map((n) => {
+                    const isActive = active === n.href.slice(1);
+                    return (
+                      <a
+                        key={n.href}
+                        href={n.href}
+                        onClick={() => setMenuOpen(false)}
+                        aria-current={isActive ? "location" : undefined}
+                        className={cn(
+                          "border-b border-s-4 border-b-white/10 border-s-transparent px-3 py-3.5 text-lg font-bold no-underline transition-colors hover:bg-white/5 hover:text-gold",
+                          isActive && "border-s-gold bg-white/5 text-gold",
+                        )}
+                      >
+                        {n.label}
+                      </a>
+                    );
+                  })}
+                </nav>
+                <Button
+                  render={<a href="#inscricao" onClick={() => setMenuOpen(false)} />}
+                  nativeButton={false}
+                  variant="gold"
+                  size="cta"
+                  className="mt-4"
+                >
+                  {CONTENT.ctaTop}
+                </Button>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
-        <nav id="mobile-menu" className={cn("mobile-menu", open && "is-open")} aria-label="Menu" inert={!open}>
-          {NAV.map((n) => (
-            <a key={n.href} href={n.href} onClick={() => setOpen(false)}>
-              {n.label}
-            </a>
-          ))}
-          <a className="btn btn-gold" href="#inscricao" onClick={() => setOpen(false)}>
-            {CONTENT.ctaTop}
-          </a>
-        </nav>
       </header>
     </div>
   );

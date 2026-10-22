@@ -1,0 +1,10 @@
+# Configuração do deploy no Netlify.
+# O Netlify detecta o Next.js sozinho (adaptador oficial); aqui só fixamos o Node
+# e fazemos o build rodar os testes antes: se algum teste falhar, o site não é publicado.
+
+[build]
+  command = "npm test && npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "24"
