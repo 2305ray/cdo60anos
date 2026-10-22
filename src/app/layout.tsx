@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   title,
   description,
   alternates: { canonical: "/" },
-  icons: { icon: "/favicon.ico" },
+  // os ícones (aba, iPhone, favicon.ico) vêm de app/icon.png, app/apple-icon.png e app/favicon.ico;
   // a imagem de compartilhamento vem de app/opengraph-image.tsx
   openGraph: { title, description: shareDescription, locale: "pt_BR", type: "website", siteName: "Dia de Ouro 2027" },
   twitter: { card: "summary_large_image", title, description: shareDescription },
