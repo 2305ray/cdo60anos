@@ -26,7 +26,7 @@ export function SiteHeader({ buildTime }: { buildTime: number }) {
       <header className="border-b-[3px] border-gold bg-navy-900/95 text-white backdrop-blur-md">
         <div className="wrap flex min-h-16 items-center gap-3.5">
           <a href="#conteudo" aria-label="Dia de Ouro: voltar ao início" className="flex items-center gap-2.5 font-black whitespace-nowrap no-underline transition-opacity hover:opacity-85">
-            <Image src={IMG.logo} alt="Cordão de Ouro Capoeira" sizes="42px" className="h-auto w-[42px]" />
+            <Image src={IMG.logo} alt="Cordão de Ouro Capoeira" sizes="42px" loading="eager" className="h-auto w-[42px]" />
             <span className="notranslate hidden min-[400px]:inline" translate="no">
               DIA DE OURO
             </span>

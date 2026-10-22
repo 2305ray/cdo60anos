@@ -12,9 +12,9 @@ import { EXTERNAL } from "@/lib/links";
 export function Social() {
   const t = CONTENT.social;
   return (
-    <Section className="pt-0 md:pt-0">
+    <Section>
       <div className="wrap">
-        <Card variant="feature" className="relative flex-row flex-wrap items-center justify-between gap-8 p-8 md:p-10">
+        <Card variant="feature" className="relative flex-row flex-wrap items-center justify-between gap-6 p-6 pt-8 sm:gap-8 sm:p-8 md:p-10">
           <div className="rope-bg absolute inset-x-0 top-0 h-2" aria-hidden="true" />
           <div className="flex max-w-[44em] gap-5">
             <IconBox variant="solid" size="lg" className="hidden sm:grid">
@@ -25,8 +25,14 @@ export function Social() {
               <p className="text-lg text-muted-foreground">{t.text}</p>
             </div>
           </div>
-          <div className="grid justify-items-center gap-2.5">
-            <Button render={<a href={whatsappLink(t.message)} {...EXTERNAL} />} nativeButton={false} variant="whatsapp" size="cta-lg">
+          <div className="grid w-full justify-items-center gap-2.5 sm:w-auto">
+            <Button
+              render={<a href={whatsappLink(t.message)} {...EXTERNAL} />}
+              nativeButton={false}
+              variant="whatsapp"
+              size="cta-lg"
+              className="w-full text-center whitespace-normal sm:w-auto sm:whitespace-nowrap"
+            >
               <WhatsappIcon size={22} />
               {t.cta}
             </Button>

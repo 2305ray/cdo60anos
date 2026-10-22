@@ -1,7 +1,7 @@
 import { DropletsIcon, ShowerHeadIcon, SquareParkingIcon, TentIcon, ZapIcon } from "lucide-react";
 import Image from "next/image";
 import { IMG } from "@/assets/images";
-import { H2, Lead, Price, Section } from "@/components/layout/section";
+import { Eyebrow, H2, Lead, Price, Section } from "@/components/layout/section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -33,8 +33,8 @@ export function Venue() {
   return (
     <Section id="local">
       <div className="wrap grid items-start gap-8 md:grid-cols-2 md:gap-14">
-        {/* esquerda: fotos com camping e estacionamento logo embaixo */}
-        <div>
+        {/* esquerda: fotos com camping e estacionamento logo embaixo (no celular vem depois do texto) */}
+        <div className="order-last md:order-first">
           <div className="grid grid-cols-[1.3fr_1fr] grid-rows-[150px_150px] gap-3 sm:grid-rows-[200px_200px]">
             {IMG.local.map((src, i) => (
               <Image
@@ -81,8 +81,9 @@ export function Venue() {
           </div>
         </div>
 
-        {/* direita: endereço, mapas e como chegar */}
-        <div>
+        {/* direita: endereço, mapas e como chegar (no celular vem primeiro, com o título) */}
+        <div className="order-first md:order-last">
+          <Eyebrow>{t.eyebrow}</Eyebrow>
           <H2>{t.title}</H2>
           <Lead>{t.lead}</Lead>
           <address className="mt-1.5 mb-[18px] text-xl font-bold not-italic">

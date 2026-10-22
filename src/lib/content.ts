@@ -79,6 +79,9 @@ export const CONTENT = {
     title: "60 anos de história",
     lead: "De uma academia em São Paulo para o mundo. Os jornais acompanharam cada passo dessa caminhada.",
     prev: "Anterior",
+    swipeHint: "Deslize para ver os outros anos",
+    scrollBack: "Ver anos anteriores",
+    scrollForward: "Ver próximos anos",
     next: "Próximo",
     items: [
       { year: "1966", title: "Da Bahia para São Paulo", text: "Mestre Suassuna, aluno de Mestre Bimba, já dava aulas em Itabuna, na Bahia. Em 1966 ele chega a São Paulo com a missão de espalhar a capoeira.", img: IMG.jornal3 },
@@ -156,6 +159,7 @@ export const CONTENT = {
       "Inscrições garantidas no 1º lote e no pacote têm a camiseta oficial do evento assegurada. Para o 2º e 3º lotes, a entrega da camiseta estará sujeita à disponibilidade de estoque.",
   },
   venue: {
+    eyebrow: "Onde vai ser",
     title: "Local do evento",
     lead: "Um clube grande e cheio de verde na Zona Sul de São Paulo, perto de Interlagos, com espaço para aulas, rodas e camping.",
     photoAlt: "Vista aérea da ADC Eletropaulo",
@@ -177,6 +181,7 @@ export const CONTENT = {
     notIncluded: "Hospedagem fora do evento e alimentação não estão inclusas na inscrição.",
   },
   hotels: {
+    eyebrow: "Hospedagem",
     title: "Onde ficar",
     lead: "Hotéis e pousadas a até 6 km do evento. As distâncias são aproximadas e podem variar conforme o trajeto. Janeiro é alta temporada, então reserve cedo.",
     filters: { all: "Todos", green: "Até 3,5 km", orange: "3,6 a 5 km", red: "5,1 a 6 km" },
